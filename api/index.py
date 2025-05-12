@@ -13,7 +13,7 @@ app = FastAPI()
 # !! CAUTION !!: This may not be optimal for Vercel's serverless environment.
 # Consider alternative platforms like Google Cloud Run or AWS Fargate for production
 # image processing at scale, as they offer better control over resources for CPU-bound tasks.
-executor = concurrent.futures.ProcessPoolExecutor(max_workers=8)
+executor = concurrent.futures.ThreadPoolExecutor(max_workers=8) # Or fewer workers
 
 SUPPORTED_FORMATS = ["png", "webp", "jpeg", "jpg"]
 
