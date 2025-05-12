@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Converter</title>
+
+    <meta name="description" content="Convert images online with various options. Supports JPG, PNG, WebP, and more.">
+    <meta name="keywords" content="image converter, online image converter, convert image, resize image, compress image, JPG, PNG, WebP">
+    <meta name="author" content="Your Name or App Name">
+
+    <meta property="og:title" content="Online Image Converter">
+    <meta property="og:description" content="Convert, resize, and optimize your images easily online.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://image-optimization-sooty.vercel.app/"> <meta property="og:image" content="https://image-optimization-sooty.vercel.app/static/og-image.png"> <meta property="og:image:alt" content="Image Converter Icon or Screenshot">
+    <meta property="og:locale" content="en_US">
+
+    <link rel="icon" href="https://image-optimization-sooty.vercel.app/static/favicon.ico" type="image/x-icon"> <script src="https://cdn.tailwindcss.com"></script>
+
+    <style>
+        /* Define shadcn/ui-like HSL color variables */
+        :root {
+            --background: 0 0% 3.9%; /* Dark background */
+            --foreground: 0 0% 98%; /* Light text */
+            --card: 0 0% 8%; /* Slightly lighter dark for cards */
+            --card-foreground: 0 0% 98%; /* Light text on cards */
+            --popover: 0 0% 8%;
+            --popover-foreground: 0 0% 98%;
+            --primary: 0 0% 98%; /* Light primary for buttons */
+            --primary-foreground: 0 0% 9%; /* Dark text on primary */
+            --secondary: 0 0% 14.9%; /* Darker secondary */
+            --secondary-foreground: 0 0% 98%; /* Light text on secondary */
+            --muted: 0 0% 14.9%;
+            --muted-foreground: 0 0% 62.9%; /* Grayish text */
+            --accent: 0 0% 14.9%;
+            --accent-foreground: 0 0% 98%;
+            --destructive: 0 84.2% 60.2%; /* Red for errors */
+            --destructive-foreground: 0 0% 98%;
+            --border: 0 0% 14.9%; /* Dark border */
+            --input: 0 0% 14.9%; /* Dark input border */
+            --ring: 0 0% 3.9%; /* Dark ring */
+            --radius: 0.5rem; /* Default border radius */
+        }
+
+        /* Custom style for drag over state - using Tailwind arbitrary values */
+        .drag-over {
+            border-color: hsl(var(--primary)) !important; /* Highlight border on drag over */
+            background-color: hsl(var(--card) / 0.5); /* Subtle background change */
+        }
+
+    </style>
+</head>
+<body class="font-sans bg-[hsl(var(--background))] text-[hsl(var(--foreground))] min-h-screen flex items-center justify-center p-4">
+
+    <div class="container mx-auto p-8 rounded-xl shadow-2xl max-w-5xl w-full border border-[hsl(var(--border))]">
+        <h1 class="text-4xl font-extrabold text-center mb-10">Image Converter</h1>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-10">
+
+            <div class="flex flex-col items-center bg-[hsl(var(--card))] text-[hsl(var(--card-foreground))] p-8 rounded-lg shadow-lg border border-[hsl(var(--border))]">
+                 <h2 class="text-2xl font-semibold mb-6">Image Preview</h2>
+
+                <div id="dropZone" class="w-full h-64 flex items-center justify-center border-2 border-dashed border-[hsl(var(--border))] rounded-md mb-6 cursor-pointer">
+                    <p class="text-[hsl(var(--muted-foreground))]">Drag & drop an image here, or click to select</p>
+                    <img id="originalPreview" class="max-w-full max-h-full h-auto rounded-md shadow-sm object-contain hidden border border-[hsl(var(--border))]" src="#" alt="Original Image Preview">
+                </div>
+
+                <div class="flex space-x-4 mb-6">
+                     <label for="imageUpload" class="inline-flex items-center justify-center whitespace-nowrap rounded-[var(--radius)] text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--ring))] focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 cursor-pointer px-4 py-2 h-10 bg-[hsl(var(--secondary))] text-[hsl(var(--secondary-foreground))] hover:bg-[hsl(var(--secondary)/0.8)]">
+                        Upload Image
+                     </label>
+                     <input class="hidden" id="imageUpload" type="file" accept="image/*">
+
+                    <button id="downloadButton" class="inline-flex items-center justify-center whitespace-nowrap rounded-[var(--radius)] text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--ring))] focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 cursor-pointer px-4 py-2 h-10 bg-[hsl(var(--secondary))] text-[hsl(var(--secondary-foreground))] hover:bg-[hsl(var(--secondary)/0.8)]" disabled>
+                        Download Converted
+                    </button>
+                </div>
+
+                 <div id="convertedPreviewContainer" class="w-full hidden">
+                     <h3 class="text-xl font-semibold mb-4">Converted Preview</h3>
+                    <img id="convertedPreview" class="max-w-full h-auto rounded-md shadow-sm border border-[hsl(var(--border))] object-contain" src="#" alt="Converted Image Preview">
+                </div>
+            </div>
+
+            <div class="bg-[hsl(var(--card))] text-[hsl(var(--card-foreground))] p-8 rounded-lg shadow-lg border border-[hsl(var(--border))]">
+                <h2 class="text-2xl font-semibold mb-6">Conversion Options</h2>
+
+                <div class="mb-6">
+                    <label class="block text-sm font-medium mb-2" for="outputFormat">
+                        Output Format
+                    </label>
+                    <select class="flex h-10 w-full rounded-[var(--radius)] border border-[hsl(var(--input))] bg-[hsl(var(--background))] px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-[hsl(var(--muted-foreground))] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--ring))] focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 text-[hsl(var(--foreground))]" id="outputFormat">
+                        <option value="webp">WebP</option>
+                        <option value="jpeg">JPEG</option>
+                        <option value="png">PNG</option>
+                        <option value="jpg">JPG</option>
+                    </select>
+                </div>
+
+                <div class="grid grid-cols-2 gap-6 mb-6">
+                    <div>
+                        <label class="block text-sm font-medium mb-2" for="width">
+                            Width (px)
+                        </label>
+                        <input class="flex h-10 w-full rounded-[var(--radius)] border border-[hsl(var(--input))] bg-[hsl(var(--background))] px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-[hsl(var(--muted-foreground))] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--ring))] focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 text-[hsl(var(--foreground))]" id="width" type="number" placeholder="Auto">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-2" for="height">
+                            Height (px)
+                        </label>
+                        <input class="flex h-10 w-full rounded-[var(--radius)] border border-[hsl(var(--input))] bg-[hsl(var(--background))] px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-[hsl(var(--muted-foreground))] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--ring))] focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 text-[hsl(var(--foreground))]" id="height" type="number" placeholder="Auto">
+                    </div>
+                </div>
+
+                <div class="mb-6">
+                    <label class="block text-sm font-medium mb-2" for="quality">
+                        Quality (1-100)
+                    </label>
+                    <input class="flex h-10 w-full rounded-[var(--radius)] border border-[hsl(var(--input))] bg-[hsl(var(--background))] px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-[hsl(var(--muted-foreground))] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--ring))] focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 text-[hsl(var(--foreground))]" id="quality" type="number" value="80" min="1" max="100">
+                </div>
+
+                <div class="mb-8" id="webpMethodOption">
+                     <label class="block text-sm font-medium mb-2" for="method">
+                        WebP Method (0-6)
+                    </label>
+                    <input class="flex h-10 w-full rounded-[var(--radius)] border border-[hsl(var(--input))] bg-[hsl(var(--background))] px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-[hsl(var(--muted-foreground))] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--ring))] focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 text-[hsl(var(--foreground))]" id="method" type="number" value="6" min="0" max="6">
+                </div>
+
+                <button id="convertButton" class="inline-flex items-center justify-center whitespace-nowrap rounded-[var(--radius)] text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--ring))] focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 cursor-pointer px-4 py-2 h-10 w-full bg-[hsl(var(--primary))] text-[hsl(var(--primary-foreground))] hover:bg-[hsl(var(--primary)/0.9)]">
+                    Convert Image
+                </button>
+
+                <p id="statusMessage" class="text-center text-sm mt-6 text-[hsl(var(--muted-foreground))]"></p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Get references to HTML elements
+        const imageUpload = document.getElementById('imageUpload');
+        const originalPreview = document.getElementById('originalPreview');
+        const originalPreviewContainer = document.getElementById('originalPreviewContainer'); // This is now the drop zone
+        const outputFormat = document.getElementById('outputFormat');
+        const widthInput = document.getElementById('width');
+        const heightInput = document.getElementById('height');
+        const qualityInput = document.getElementById('quality');
+        const methodInput = document.getElementById('method');
+        const webpMethodOption = document.getElementById('webpMethodOption');
+        const convertButton = document.getElementById('convertButton');
+        const convertedPreview = document.getElementById('convertedPreview');
+        const convertedPreviewContainer = document.getElementById('convertedPreviewContainer');
+        const downloadButton = document.getElementById('downloadButton');
+        const statusMessage = document.getElementById('statusMessage');
+        const dropZone = document.getElementById('dropZone'); // Reference to the drop zone element
+
+        let originalFile = null; // To store the selected file
+        let convertedBlob = null; // To store the converted image blob
+
+         // Function to handle file processing and preview update
+        function processSelectedFile(file) {
+             if (file && file.type.startsWith('image/')) {
+                originalFile = file;
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    originalPreview.src = e.target.result;
+                    originalPreview.classList.remove('hidden'); // Show the image
+                    dropZone.querySelector('p').classList.add('hidden'); // Hide the text
+                    convertButton.disabled = false; // Enable convert button
+                    convertedPreviewContainer.classList.add('hidden'); // Hide converted preview
+                    downloadButton.disabled = true; // Disable download button
+                    statusMessage.textContent = ''; // Clear status message
+                }
+                reader.readAsDataURL(originalFile);
+            } else {
+                // Handle non-image files or no file
+                originalFile = null;
+                originalPreview.src = '#';
+                originalPreview.classList.add('hidden'); // Hide the image
+                dropZone.querySelector('p').classList.remove('hidden'); // Show the text
+                convertButton.disabled = true;
+                convertedPreviewContainer.classList.add('hidden');
+                downloadButton.disabled = true;
+                statusMessage.textContent = 'Please select a valid image file.';
+            }
+        }
+
+
+        // --- Event Listeners ---
+
+        // Handle file selection from input
+        imageUpload.addEventListener('change', function(event) {
+            processSelectedFile(event.target.files[0]);
+        });
+
+        // Toggle WebP method option based on selected format
+        outputFormat.addEventListener('change', function() {
+            if (outputFormat.value === 'webp') {
+                webpMethodOption.classList.remove('hidden');
+            } else {
+                webpMethodOption.classList.add('hidden');
+            }
+        });
+
+        // Handle convert button click
+        convertButton.addEventListener('click', async function() {
+            if (!originalFile) {
+                statusMessage.textContent = 'Please select an image file first.';
+                return;
+            }
+
+            statusMessage.textContent = 'Converting...';
+            convertButton.disabled = true;
+            downloadButton.disabled = true;
+            convertedPreviewContainer.classList.add('hidden');
+
+
+            const formData = new FormData();
+            formData.append('file', originalFile); // 'file' must match the FastAPI endpoint parameter name
+
+            // Get conversion options
+            const selectedFormat = outputFormat.value;
+            const width = widthInput.value ? parseInt(widthInput.value) : undefined;
+            const height = heightInput.value ? parseInt(heightInput.value) : undefined;
+            const quality = qualityInput.value ? parseInt(qualityInput.value) : undefined;
+            const method = methodInput.value && selectedFormat === 'webp' ? parseInt(methodInput.value) : undefined;
+
+            // Construct query parameters
+            const params = new URLSearchParams();
+            params.append('out_format', selectedFormat);
+            if (width !== undefined && !isNaN(width)) {
+                params.append('width', width);
+            }
+            if (height !== undefined && !isNaN(height)) {
+                params.append('height', height);
+            }
+            if (quality !== undefined && !isNaN(quality)) {
+                 params.append('quality', quality);
+            }
+             if (method !== undefined && !isNaN(method)) {
+                 params.append('method', method);
+            }
+
+
+            // Construct the backend URL
+            // !! IMPORTANT: Replace with your actual Vercel deployment URL !!
+            const backendUrl = `https://image-optimization-sooty.vercel.app/convert?${params.toString()}`;
+
+
+            try {
+                const response = await fetch(backendUrl, {
+                    method: 'POST',
+                    body: formData,
+                });
+
+                if (!response.ok) {
+                    // Handle HTTP errors
+                    const errorText = await response.text();
+                    throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
+                }
+
+                // Get the converted image as a Blob
+                convertedBlob = await response.blob();
+
+                // Display converted image preview
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    convertedPreview.src = e.target.result;
+                    convertedPreviewContainer.classList.remove('hidden');
+                    downloadButton.disabled = false; // Enable download button
+                    statusMessage.textContent = 'Conversion successful!';
+                }
+                reader.readAsDataURL(convertedBlob);
+
+            } catch (error) {
+                console.error('Conversion failed:', error); // Log the full error object
+                // Provide a more informative error message
+                statusMessage.textContent = `Conversion failed: ${error.message || 'An unknown error occurred.'}`;
+                convertedPreviewContainer.classList.add('hidden');
+                downloadButton.disabled = true;
+            } finally {
+                convertButton.disabled = false; // Re-enable convert button
+            }
+        });
+
+        // Handle download button click
+        downloadButton.addEventListener('click', function() {
+            if (convertedBlob) {
+                // Create a temporary URL for the blob
+                const url = URL.createObjectURL(convertedBlob);
+
+                // Create a temporary link element
+                const a = document.createElement('a');
+                a.href = url;
+
+                // Suggest a filename based on the original name and new format
+                const originalFileName = originalFile ? originalFile.name.split('.')[0] : 'converted';
+                const selectedFormat = outputFormat.value;
+                a.download = `${originalFileName}.${selectedFormat}`;
+
+                // Append link to body, click it, and remove it
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+
+                // Release the object URL
+                URL.revokeObjectURL(url);
+            }
+        });
+
+        // --- Drag and Drop Functionality ---
+
+        // Prevent default drag behaviors
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            dropZone.addEventListener(eventName, preventDefaults, false);
+            document.body.addEventListener(eventName, preventDefaults, false); // Prevent default on body too
+        });
+
+        function preventDefaults(e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+
+        // Highlight drop zone on drag enter/over
+        ['dragenter', 'dragover'].forEach(eventName => {
+            dropZone.addEventListener(eventName, highlight, false);
+        });
+
+        // Unhighlight drop zone on drag leave/drop
+        ['dragleave', 'drop'].forEach(eventName => {
+            dropZone.classList.remove('drag-over');
+        });
+
+        function highlight(e) {
+            dropZone.classList.add('drag-over');
+        }
+
+        function unhighlight(e) {
+            dropZone.classList.remove('drag-over');
+        }
+
+        // Handle dropped files
+        dropZone.addEventListener('drop', handleDrop, false);
+
+        function handleDrop(e) {
+            const dt = e.dataTransfer;
+            const files = dt.files;
+
+            // Process the first file if it's an image
+            if (files.length > 0) {
+                 processSelectedFile(files[0]);
+            }
+        }
+
+        // Allow clicking the drop zone to trigger the file input
+        dropZone.addEventListener('click', function() {
+            imageUpload.click();
+        });
+
+
+        // Initial state setup
+        webpMethodOption.classList.remove('hidden'); // Show WebP method by default
+        convertButton.disabled = true; // Disable convert button initially
+        downloadButton.disabled = true; // Disable download button initially
+
+    </script>
+
+</body>
+</html>
+
