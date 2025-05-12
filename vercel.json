@@ -1,15 +1,36 @@
 {
-  "devCommand": "uvicorn api.index:app --host 0.0.0.0 --port 3000",
+  "version": 2,
   "builds": [
     {
       "src": "api/index.py",
       "use": "@vercel/python"
     }
+    // No separate build configuration is needed for static files
+    // if they are served directly via routes from a designated directory.
   ],
   "routes": [
     {
-      "src": "/(.*)",
+      "src": "/",
+      "dest": "/static/index.html"
+    },
+    {
+      "src": "/static/(.*)",
+      "dest": "/static/$1"
+    },
+    {
+      "src": "/convert",
       "dest": "api/index.py"
     }
-  ]
+    // If you have other API endpoints in api/index.py (e.g., /items),
+    // you would add routes for them here as well:
+    // {
+    //   "src": "/items/(.*)",
+    //   "dest": "api/index.py"
+    // }
+  ],
+  "devCommand": "uvicorn api.index:app --host 0.0.0.0 --port 3000"
+  // Assuming your api and static folders are at the root of your project.
+  // If they are in a subfolder (e.g., 'src'), you would add:
+  // "rootDirectory": "src"
 }
+
