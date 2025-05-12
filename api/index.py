@@ -1,18 +1,21 @@
+# api/index.py
 from fastapi import FastAPI, File, UploadFile, Query, Response
 from fastapi.responses import StreamingResponse
 from PIL import Image
 import io
 import concurrent.futures
-import uvicorn
+# import uvicorn # Remove this line, not needed for Vercel
 import asyncio
 
 app = FastAPI()
 
 # ProcessPoolExecutor for parallel processing
+# !! CAUTION !!: This may not be optimal for Vercel's serverless environment.
+# Consider alternative platforms like Google Cloud Run or AWS Fargate for production
+# image processing at scale, as they offer better control over resources for CPU-bound tasks.
 executor = concurrent.futures.ProcessPoolExecutor(max_workers=8)
 
 SUPPORTED_FORMATS = ["png", "webp", "jpeg", "jpg"]
-
 
 def process_image(
     file_bytes: bytes,
@@ -74,6 +77,6 @@ async def convert_image(
 def root():
     return {"message": "Image conversion API. POST /convert with image file."}
 
-# For local testing only
-if __name__ == "__main__":
-    uvicorn.run("image_api_server:app", host="0.0.0.0", port=8000, reload=True)
+# The following block is for local testing only and should be removed or commented out for Vercel deployment.
+# if __name__ == "__main__":
+#     uvicorn.run("image_api_server:app", host="0.0.0.0", port=8000, reload=True)
