@@ -3,12 +3,12 @@ from fastapi.responses import StreamingResponse
 from PIL import Image
 import io
 import concurrent.futures
-# import uvicorn
+#import uvicorn
 import asyncio
 
 app = FastAPI()
 
-executor = concurrent.futures.ProcessPoolExecutor(max_workers=2)
+#executor = concurrent.futures.ProcessPoolExecutor(max_workers=2)
 
 SUPPORTED_FORMATS = ["png", "webp", "jpeg", "jpg"]
 
@@ -90,5 +90,6 @@ async def convert_image(
 def root():
     return {"message": "Image conversion API. POST /convert with image file."}
 
-# if __name__ == "__main__":
-#     uvicorn.run("image_api_server2:app", host="0.0.0.0", port=8001, reload=True)
+#if __name__ == "__main__":
+#     uvicorn.run("index:app", host="0.0.0.0", port=8001, reload=True)
+
