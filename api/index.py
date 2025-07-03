@@ -3,12 +3,12 @@ from fastapi.responses import StreamingResponse
 from PIL import Image
 import io
 import concurrent.futures
-import uvicorn
+# import uvicorn
 import asyncio
 
 app = FastAPI()
 
-executor = concurrent.futures.ProcessPoolExecutor(max_workers=8)
+executor = concurrent.futures.ProcessPoolExecutor(max_workers=2)
 
 SUPPORTED_FORMATS = ["png", "webp", "jpeg", "jpg"]
 
