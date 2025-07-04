@@ -72,7 +72,7 @@ async def convert_image(
     file_bytes = await file.read()
     loop = asyncio.get_running_loop()
     buf = await loop.run_in_executor(
-        executor,
+        None,
         process_image,
         file_bytes,
         out_format,
